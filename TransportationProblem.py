@@ -1,5 +1,5 @@
 import numpy as np
-from Exceptions import InfeasibleSolution
+from Exceptions import ImbalancedProblem
 import termtables as tt
 
 
@@ -23,7 +23,7 @@ class Transportation:
 
     def check_inputs(self):
         if sum(self.supply) != sum(self.demand):
-            raise InfeasibleSolution()
+            raise ImbalancedProblem()
 
     def print_initial_data(self):
         # print data as a table with supply at the right and demand at the bottom

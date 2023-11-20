@@ -228,9 +228,8 @@ def main():
     # print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
     # print("m", transportation.m)
     #
-    # solution = transportation.northwest_corner_method()
-    # print("ans", solution.cost)
-    # print("solution\n", solution.solution)
+    # print(transportation.northwest_corner_method())
+
 
     supply, demand, costs = parse_input("inputs/input2.txt")
 
@@ -239,9 +238,7 @@ def main():
     print("costs", transportation.costs)
     print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
     print("m", transportation.m)
-    solution = transportation.vogel_method()
-    print("ans", solution.cost)
-    print("solution\n", solution.solution)
+    print(transportation.vogel_method())
 
 
 if __name__ == '__main__':

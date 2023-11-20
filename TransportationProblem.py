@@ -83,7 +83,6 @@ class Transportation:
             # Find the highest cost value for each row and column for each source remaining under consideration
             u = np.zeros(self.n)
             v = np.zeros(self.m)
-            delta = np.zeros((self.n, self.m))
             for i in range(self.n):
                 for j in range(self.m):
                     # check if row is still under consideration, if not, skip row
@@ -98,34 +97,29 @@ class Transportation:
                     if self.solution[i, j] == 0 and self.costs[i, j] > v[j]:
                         v[j] = self.costs[i, j]
 
-            # Subtract each cost value on the columns and rows at their highest cost. (Calculate delta)
-            for i in range(self.n):
-                for j in range(self.m):
-                    if self.solution[i, j] == 0:
-                        delta[i, j] = self.costs[i, j] - u[i] - v[j]
+            delta = np.subtract(self.costs, np.add(u.reshape(self.n, 1), v.reshape(1, self.m)))
+
             if debug:
                 print("Debug:")
-
                 print(u)
                 print(v)
                 print(delta)
 
             # Select the variable having the largest (in absolute
             # terms) negative value of delta
-            largest_negative_delta = (0, 0)
+            next_path = (0, 0)
             value = 0
             for i in range(self.n):
                 for j in range(self.m):
                     if delta[i, j] < 0 and abs(delta[i, j]) > value:
                         value = abs(delta[i, j])
-                        largest_negative_delta = (i, j)
+                        next_path = (i, j)
 
             # allocate goods or products on the cell
-            self.solution[largest_negative_delta[0], largest_negative_delta[1]] = min(self.supply[largest_negative_delta[0]], self.demand[largest_negative_delta[1]])
-            self.supply[largest_negative_delta[0]] -= self.solution[largest_negative_delta[0], largest_negative_delta[1]]
-            self.demand[largest_negative_delta[1]] -= self.solution[largest_negative_delta[0], largest_negative_delta[1]]
+            self.solution[next_path[0], next_path[1]] = min(self.supply[next_path[0]], self.demand[next_path[1]])
+            self.supply[next_path[0]] -= self.solution[next_path[0], next_path[1]]
+            self.demand[next_path[1]] -= self.solution[next_path[0], next_path[1]]
             if debug:
-
                 print("Solution:")
                 print(self.solution)
                 print(self.supply)

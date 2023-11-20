@@ -1,6 +1,7 @@
 import numpy as np
 from Exceptions import ImbalancedProblem
 import termtables as tt
+from input_parser import parse_input
 
 
 class TransportationSolution:
@@ -60,10 +61,38 @@ class Transportation:
         print(view)
 
     def north_west_corner_method(self):
-        pass
+        start_row, start_column = 0, 0
+        ans = 0
+        while start_row != (self.m - 1) and start_column != (self.n - 1):
+            if self.supply[start_row] <= self.demand[start_column]:
+                ans += self.supply[start_row] * self.costs[start_row][start_column]
+                self.demand[start_column] -= self.supply[start_row]
+                start_row += 1
+            else:
+                ans += self.demand[start_column] * self.costs[start_row][start_column]
+                self.supply[start_row] -= self.demand[start_column]
+                start_column += 1
+        return ans
 
     def vogel_method(self):
         pass
 
     def russell_method(self):
         pass
+
+
+def main():
+    supply, demand, costs = parse_input("inputs/input1.txt")
+
+    transportation = Transportation(supply, demand, costs)
+    transportation.print_initial_table()
+    print("costs", transportation.costs)
+    print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
+    print("m", transportation.m)
+    ans = transportation.north_west_corner_method()
+    print("ans", ans)
+    # print("ans", transportation.north_west_corner_method())
+
+
+if __name__ == '__main__':
+    main()

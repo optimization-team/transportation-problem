@@ -1,9 +1,10 @@
 import numpy as np
-from Exceptions import ImbalancedProblem
 import termtables as tt
-
+from Exceptions import ImbalancedProblem, InfeasibleSolution
 from input_parser import parse_input
 
+#TODO: 3 supply, 4 demands check
+# check if any coefficients are negative
 
 class TransportationSolution:
     def __init__(self, solution, cost):
@@ -11,8 +12,6 @@ class TransportationSolution:
         self.cost = float(cost)
 
     def __str__(self):
-        # return f"Solution:\n {self.solution}\nCost: {self.cost}"
-        # return a table without [[ and ]]
         table = []
         for i in range(self.solution.shape[0]):
             row = []
@@ -35,8 +34,11 @@ class Transportation:
         self.check_inputs()
 
     def check_inputs(self):
+        if np.any(self.costs < 0) or np.any(np.array(self.supply) < 0) or np.any(np.array(self.demand) < 0):
+            raise InfeasibleSolution()
         if sum(self.supply) != sum(self.demand):
             raise ImbalancedProblem()
+
 
     def print_initial_table(self):
         table = []

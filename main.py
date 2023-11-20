@@ -25,7 +25,7 @@ def main():
         print(solution)
 
     except InfeasibleSolution:
-        print("The problem does not have solution!")
+        print("The method is not applicable!")
         return
     except ImbalancedProblem:
         print("The problem is not balanced!")

@@ -11,18 +11,15 @@ def main():
         russell = RussellMethod(supply, demand, costs)
         northwest.print_initial_table()
 
-        solution1 = northwest.solve()
-        solution2 = vogel.solve()
-        solution = russell.solve()
         print("-----------------------------")
         print("Northwest Corner rule:")
-        print(solution1)
+        print(northwest.solve())
         print("-----------------------------")
         print("Vogel's approximation:")
-        print(solution2)
+        print(vogel.solve())
         print("-----------------------------")
         print("Russell's approximation:")
-        print(solution)
+        print(russell.solve())
 
     except InfeasibleSolution:
         print("The method is not applicable!")

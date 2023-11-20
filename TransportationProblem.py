@@ -3,8 +3,6 @@ import termtables as tt
 from Exceptions import ImbalancedProblem, InfeasibleSolution
 from input_parser import parse_input
 
-#TODO: 3 supply, 4 demands check
-# check if any coefficients are negative
 
 class TransportationSolution:
     def __init__(self, solution, cost):
@@ -23,7 +21,6 @@ class TransportationSolution:
 
 
 class Transportation:
-
     def __init__(self, supply, demand, costs):
         self.costs = np.matrix(costs)
         self.supply = supply
@@ -38,7 +35,6 @@ class Transportation:
             raise InfeasibleSolution()
         if sum(self.supply) != sum(self.demand):
             raise ImbalancedProblem()
-
 
     def print_initial_table(self):
         table = []
@@ -93,7 +89,6 @@ class VogelMethod(Transportation):
         super().__init__(supply, demand, costs)
 
     def solve(self) -> TransportationSolution:
-        # self.__init__(self.sup, self.dem, self.cst)
         def find_difference(costs):
             row_difference = []
             column_difference = []

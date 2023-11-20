@@ -1,6 +1,3 @@
-from numpy import matrix
-
-
 def parse_input(filename: str) -> tuple:
     with open(filename) as file:
         supply = list(map(int, file.readline().split()))

@@ -75,23 +75,91 @@ class Transportation:
         return ans
 
     def vogel_method(self):
-        pass
+        def find_difference(costs):
+            row_difference = []
+            column_difference = []
+            for i in range(costs.shape[0]):
+                arr = sorted(costs[i])
+                row_difference.append(arr[1] - arr[0])
+            column_index = 0
+            while column_index < len(costs[0]):
+                arr = []
+                for i in range(costs.shape[0]):
+                    arr.append(costs[i][column_index])
+                arr = sorted(arr)
+                column_index += 1
+                column_difference.append(arr[1] - arr[0])
+            return row_difference, column_difference
+
+        def vogel_method_help(costs: np.ndarray, supply, demand, total):
+            if costs.shape[0] == 1:
+                return sum([a * b for (a, b) in zip(demand, costs[0])]) + total
+            if costs.shape[1] == 1:
+                return sum([a * b for (a, b) in zip(supply, costs[:, 0])]) + total
+
+            row_differences, column_differences = find_difference(costs)
+            max_row_dif_index, max_row_dif = max(zip(range(costs.shape[0]), row_differences), key=lambda x: x[1])
+            max_col_dif_index, max_col_dif = max(zip(range(costs.shape[1]), column_differences), key=lambda x: x[1])
+            # max element is in among row_differences
+            # ????? >=
+
+            if max_row_dif >= max_col_dif:
+                row = costs[max_row_dif_index]
+                target_col_index, min_col_elem = min(zip(range(costs.shape[1]), row), key=lambda x: x[1])
+                target_row_index = max_row_dif_index
+            else:
+                col = costs[:, max_col_dif_index]
+                target_row_index, min_row_elem = min(zip(range(costs.shape[0]), col), key=lambda x: x[1])
+                target_col_index = max_col_dif_index
+
+            target_elem = costs[target_row_index][target_col_index]
+            target_supply = supply[target_row_index]
+            target_demand = demand[target_col_index]
+
+            if target_demand > target_supply:
+                dif = target_demand - target_supply
+                # exclude target supply
+                new_consts = np.delete(costs, target_row_index, axis=0)
+                new_supply = np.delete(supply, target_row_index)
+                new_demand = demand.copy()
+                new_demand[target_col_index] = dif
+                return vogel_method_help(new_consts, new_supply, new_demand, target_elem * target_supply + total)
+            else:
+                dif = target_supply - target_demand
+                new_consts = np.delete(costs, target_col_index, axis=1)
+                new_demand = np.delete(demand, target_col_index)
+                new_supply = supply.copy()
+                new_supply[target_row_index] = dif
+                return vogel_method_help(new_consts, new_supply, new_demand, target_elem * target_demand + total)
+
+        return vogel_method_help(np.asarray(self.costs), self.supply.copy(), self.demand.copy(), 0)
 
     def russell_method(self):
         pass
 
 
 def main():
-    supply, demand, costs = parse_input("inputs/input1.txt")
+    # supply, demand, costs = parse_input("inputs/input1.txt")
+    #
+    # transportation = Transportation(supply, demand, costs)
+    # transportation.print_initial_table()
+    # print("costs", transportation.costs)
+    # print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
+    # print("m", transportation.m)
+    # ans = transportation.northwest_corner_method()
+    # print("ans", ans)
+
+    # print("ans", transportation.north_west_corner_method())
+
+    supply, demand, costs = parse_input("inputs/input2.txt")
 
     transportation = Transportation(supply, demand, costs)
     transportation.print_initial_table()
     print("costs", transportation.costs)
     print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
     print("m", transportation.m)
-    ans = transportation.northwest_corner_method()
+    ans = transportation.vogel_method()
     print("ans", ans)
-    # print("ans", transportation.north_west_corner_method())
 
 
 if __name__ == '__main__':

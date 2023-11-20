@@ -10,6 +10,10 @@ def main():
         transportation = Transportation(supply, demand, costs)
         transportation.print_initial_table()
         solution = transportation.russell_method()
+        solution1 = transportation.northwest_corner_method()
+        solution2 = transportation.vogel_method()
+        print("Northwest Corner rule:\n", solution1)
+        print("Vogel's approximation:\n", solution2)
         print("Solution:")
         print(solution)
     except InfeasibleSolution:

@@ -10,6 +10,7 @@ def main():
         transportation = Transportation(supply, demand, costs)
         transportation.print_initial_table()
         solution = transportation.russell_method()
+        print("Solution:")
         print(solution)
     except InfeasibleSolution:
         print("The problem does not have solution!")

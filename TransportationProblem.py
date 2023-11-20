@@ -1,15 +1,14 @@
 import numpy as np
 from Exceptions import ImbalancedProblem
 import termtables as tt
-import itertools
-debug = False
+
 from input_parser import parse_input
 
 
 class TransportationSolution:
     def __init__(self, solution, cost):
         self.solution = solution
-        self.cost = cost
+        self.cost = float(cost)
 
     def __str__(self):
         # return f"Solution:\n {self.solution}\nCost: {self.cost}"
@@ -21,7 +20,7 @@ class TransportationSolution:
                 row.append(self.solution[i, j])
             table.append(row)
 
-        return f"Solution:\n{tt.to_string(table)}\nCost: {self.cost}"
+        return f"Solution:\n{tt.to_string(table)}\nCost: {self.cost}\n"
 
 
 class Transportation:
@@ -38,22 +37,6 @@ class Transportation:
     def check_inputs(self):
         if sum(self.supply) != sum(self.demand):
             raise ImbalancedProblem()
-
-    def print_initial_data(self):
-        print("Initial data:")
-        print("Supply: ", end="")
-        for i in range(self.n):
-            print(f"{self.supply[i]} ", end="")
-        print()
-        print("Demand: ", end="")
-        for i in range(self.m):
-            print(f"{self.demand[i]} ", end="")
-        print()
-        print("Costs:")
-        for i in range(self.n):
-            for j in range(self.m):
-                print(f"{self.costs[i, j]} ", end="")
-            print()
 
     def print_initial_table(self):
         table = []
@@ -74,10 +57,15 @@ class Transportation:
         )
         print(view)
 
-    def northwest_corner_method(self) -> TransportationSolution:
+
+class NorthwestCornerMethod(Transportation):
+    def __init__(self, supply, demand, costs):
+        super().__init__(supply, demand, costs)
+
+    def solve(self) -> TransportationSolution:
         def northwest_corner_method_help(costs, supply, demand, solution) -> TransportationSolution:
             row_index, column_index = 0, 0
-            ans = 0
+            ans = 0.0
             while row_index <= (costs.shape[0] - 1) and column_index <= (costs.shape[1] - 1):
                 if supply[row_index] <= demand[column_index]:
                     ans += supply[row_index] * costs.item((row_index, column_index))
@@ -97,7 +85,13 @@ class Transportation:
             self.demand.copy(),
             self.solution.copy())
 
-    def vogel_method(self) -> TransportationSolution:
+
+class VogelMethod(Transportation):
+    def __init__(self, supply, demand, costs):
+        super().__init__(supply, demand, costs)
+
+    def solve(self) -> TransportationSolution:
+        # self.__init__(self.sup, self.dem, self.cst)
         def find_difference(costs):
             row_difference = []
             column_difference = []
@@ -130,7 +124,7 @@ class Transportation:
                     sum([a * b for (a, b) in zip(demand, costs[0])]) + total
                 )
             if costs.shape[1] == 1:
-                for(row_id, elem) in zip(row_ids, supply):
+                for (row_id, elem) in zip(row_ids, supply):
                     solution[row_id][col_ids[0]] = elem
                 return TransportationSolution(
                     solution,
@@ -194,7 +188,12 @@ class Transportation:
             np.arange(self.costs.shape[0]),
             np.arange(self.costs.shape[1]))
 
-    def russell_method(self):
+
+class RussellMethod(Transportation):
+    def __init__(self, supply, demand, costs):
+        super().__init__(supply, demand, costs)
+
+    def solve(self):
         while True:
             # Find the highest cost value for each row and column for each source remaining under consideration
             u = np.zeros(self.n)
@@ -215,12 +214,6 @@ class Transportation:
 
             delta = np.subtract(self.costs, np.add(u.reshape(self.n, 1), v.reshape(1, self.m)))
 
-            if debug:
-                print("Debug:")
-                print(u)
-                print(v)
-                print(delta)
-
             # Select the variable having the largest (in absolute
             # terms) negative value of delta
             next_path = (0, 0)
@@ -235,11 +228,6 @@ class Transportation:
             self.solution[next_path[0], next_path[1]] = min(self.supply[next_path[0]], self.demand[next_path[1]])
             self.supply[next_path[0]] -= self.solution[next_path[0], next_path[1]]
             self.demand[next_path[1]] -= self.solution[next_path[0], next_path[1]]
-            if debug:
-                print("Solution:")
-                print(self.solution)
-                print(self.supply)
-                print(self.demand)
 
             # check if all products are distributed (if all values in supply and demand are 0)
             if np.all(np.array(self.supply) == 0) and np.all(np.array(self.demand) == 0):
@@ -247,20 +235,7 @@ class Transportation:
         return TransportationSolution(self.solution, np.multiply(self.solution, self.costs).sum())
 
 
-
-
 def main():
-    # supply, demand, costs = parse_input("inputs/input3.txt")
-    #
-    # transportation = Transportation(supply, demand, costs)
-    # transportation.print_initial_table()
-    # print("costs", transportation.costs)
-    # print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
-    # print("m", transportation.m)
-    #
-    # print(transportation.northwest_corner_method())
-
-
     supply, demand, costs = parse_input("inputs/input2.txt")
 
     transportation = Transportation(supply, demand, costs)
@@ -268,7 +243,7 @@ def main():
     print("costs", transportation.costs)
     print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
     print("m", transportation.m)
-    print(transportation.vogel_method())
+    print("n", transportation.n)
 
 
 if __name__ == '__main__':

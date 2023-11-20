@@ -61,17 +61,17 @@ class Transportation:
         print(view)
 
     def northwest_corner_method(self):
-        start_row, start_column = 0, 0
+        row_index, column_index = 0, 0
         ans = 0
-        while start_row != (self.m - 1) and start_column != (self.n - 1):
-            if self.supply[start_row] <= self.demand[start_column]:
-                ans += self.supply[start_row] * self.costs[start_row][start_column]
-                self.demand[start_column] -= self.supply[start_row]
-                start_row += 1
+        while row_index <= (self.n - 1) and column_index <= (self.m - 1):
+            if self.supply[row_index] <= self.demand[column_index]:
+                ans += self.supply[row_index] * self.costs.item((row_index, column_index))
+                self.demand[column_index] -= self.supply[row_index]
+                row_index += 1
             else:
-                ans += self.demand[start_column] * self.costs[start_row][start_column]
-                self.supply[start_row] -= self.demand[start_column]
-                start_column += 1
+                ans += self.demand[column_index] * self.costs.item((row_index, column_index))
+                self.supply[row_index] -= self.demand[column_index]
+                column_index += 1
         return ans
 
     def vogel_method(self):

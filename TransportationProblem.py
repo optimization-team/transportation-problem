@@ -1,7 +1,8 @@
 import numpy as np
 from Exceptions import ImbalancedProblem
 import termtables as tt
-
+import itertools
+debug = False
 
 class TransportationSolution:
     def __init__(self, solution, cost):
@@ -78,27 +79,61 @@ class Transportation:
         pass
 
     def russell_method(self):
-
-        u = np.zeros(self.n)
-        v = np.zeros(self.m)
-        delta = np.zeros((self.n, self.m))
         while True:
-            # determine u_i
-            for i in range(self.n):
-                if self.supply[i] > 0:
-                    u[i] = np.min(self.costs[i, :][self.costs[i, :] > 0])
-            # determine v_j
-            for j in range(self.m):
-                if self.demand[j] > 0:
-                    v[j] = np.min(self.costs[:, j][self.costs[:, j] > 0])
-            # calculate delta
+            # Find the highest cost value for each row and column for each source remaining under consideration
+            u = np.zeros(self.n)
+            v = np.zeros(self.m)
+            delta = np.zeros((self.n, self.m))
             for i in range(self.n):
                 for j in range(self.m):
-                    if self.costs[i, j] > 0:
-                        delta[i, j] = self.costs[i, j] - u[i] - v[j]
-            # select the variable having the largest (in absolute terms) negative value of delta
-            min_delta = np.min(delta)
+                    # check if row is still under consideration, if not, skip row
+                    if self.supply[i] == 0:
+                        continue
+                    if self.solution[i, j] == 0 and self.costs[i, j] > u[i]:
+                        u[i] = self.costs[i, j]
+            for j in range(self.m):
+                for i in range(self.n):
+                    if self.demand[j] == 0:
+                        continue
+                    if self.solution[i, j] == 0 and self.costs[i, j] > v[j]:
+                        v[j] = self.costs[i, j]
 
-        return TransportationSolution(self.solution, np.sum(self.solution * self.costs.transpose()))
+            # Subtract each cost value on the columns and rows at their highest cost. (Calculate delta)
+            for i in range(self.n):
+                for j in range(self.m):
+                    if self.solution[i, j] == 0:
+                        delta[i, j] = self.costs[i, j] - u[i] - v[j]
+            if debug:
+                print("Debug:")
+
+                print(u)
+                print(v)
+                print(delta)
+
+            # Select the variable having the largest (in absolute
+            # terms) negative value of delta
+            largest_negative_delta = (0, 0)
+            value = 0
+            for i in range(self.n):
+                for j in range(self.m):
+                    if delta[i, j] < 0 and abs(delta[i, j]) > value:
+                        value = abs(delta[i, j])
+                        largest_negative_delta = (i, j)
+
+            # allocate goods or products on the cell
+            self.solution[largest_negative_delta[0], largest_negative_delta[1]] = min(self.supply[largest_negative_delta[0]], self.demand[largest_negative_delta[1]])
+            self.supply[largest_negative_delta[0]] -= self.solution[largest_negative_delta[0], largest_negative_delta[1]]
+            self.demand[largest_negative_delta[1]] -= self.solution[largest_negative_delta[0], largest_negative_delta[1]]
+            if debug:
+
+                print("Solution:")
+                print(self.solution)
+                print(self.supply)
+                print(self.demand)
+
+            # check if all products are distributed (if all values in supply and demand are 0)
+            if np.all(np.array(self.supply) == 0) and np.all(np.array(self.demand) == 0):
+                break
+        return TransportationSolution(self.solution, np.multiply(self.solution, self.costs).sum())
 
 

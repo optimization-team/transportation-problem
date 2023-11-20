@@ -60,7 +60,7 @@ class Transportation:
         )
         print(view)
 
-    def north_west_corner_method(self):
+    def northwest_corner_method(self):
         start_row, start_column = 0, 0
         ans = 0
         while start_row != (self.m - 1) and start_column != (self.n - 1):
@@ -89,7 +89,7 @@ def main():
     print("costs", transportation.costs)
     print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
     print("m", transportation.m)
-    ans = transportation.north_west_corner_method()
+    ans = transportation.northwest_corner_method()
     print("ans", ans)
     # print("ans", transportation.north_west_corner_method())
 

@@ -9,6 +9,18 @@ class TransportationSolution:
         self.solution = solution
         self.cost = cost
 
+    def __str__(self):
+        # return f"Solution:\n {self.solution}\nCost: {self.cost}"
+        # return a table without [[ and ]]
+        table = []
+        for i in range(self.solution.shape[0]):
+            row = []
+            for j in range(self.solution.shape[1]):
+                row.append(self.solution[i, j])
+            table.append(row)
+
+        return f"Solution:\n{tt.to_string(table)}\nCost: {self.cost}"
+
 
 class Transportation:
 
@@ -181,7 +193,30 @@ class Transportation:
             np.arange(self.costs.shape[1]))
 
     def russell_method(self):
-        pass
+
+        u = np.zeros(self.n)
+        v = np.zeros(self.m)
+        delta = np.zeros((self.n, self.m))
+        while True:
+            # determine u_i
+            for i in range(self.n):
+                if self.supply[i] > 0:
+                    u[i] = np.min(self.costs[i, :][self.costs[i, :] > 0])
+            # determine v_j
+            for j in range(self.m):
+                if self.demand[j] > 0:
+                    v[j] = np.min(self.costs[:, j][self.costs[:, j] > 0])
+            # calculate delta
+            for i in range(self.n):
+                for j in range(self.m):
+                    if self.costs[i, j] > 0:
+                        delta[i, j] = self.costs[i, j] - u[i] - v[j]
+            # select the variable having the largest (in absolute terms) negative value of delta
+            min_delta = np.min(delta)
+
+        return TransportationSolution(self.solution, np.sum(self.solution * self.costs.transpose()))
+
+
 
 
 def main():

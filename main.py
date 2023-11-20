@@ -1,4 +1,4 @@
-from TransportationProblem import Transportation
+from TransportationProblem import Transportation, TransportationSolution
 from Exceptions import InfeasibleSolution
 from input_parser import parse_input
 
@@ -9,10 +9,12 @@ def main():
     try:
         transportation = Transportation(supply, demand, costs)
         transportation.print_initial_table()
-        transportation.north_west_corner_method()
+        solution = transportation.russell_method()
+        print(solution)
     except InfeasibleSolution:
         print("The problem does not have solution!")
         return
+
 
 if __name__ == '__main__':
     main()

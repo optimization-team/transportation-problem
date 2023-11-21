@@ -66,7 +66,7 @@ class NorthwestCornerMethod(Transportation):
         super().__init__(supply, demand, costs)
 
     def solve(self) -> TransportationSolution:
-        def northwest_corner_method_help(costs, supply, demand, solution) -> TransportationSolution:
+        def northwest_corner_method_help(costs, supply, demand, solution, basic) -> TransportationSolution:
             row_index, column_index = 0, 0
             ans = 0.0
             while row_index <= (costs.shape[0] - 1) and column_index <= (costs.shape[1] - 1):
@@ -74,19 +74,22 @@ class NorthwestCornerMethod(Transportation):
                     ans += supply[row_index] * costs.item((row_index, column_index))
                     demand[column_index] -= supply[row_index]
                     solution[row_index][column_index] = supply[row_index]
+                    basic[row_index][column_index] = 1
                     row_index += 1
                 else:
                     ans += demand[column_index] * costs.item((row_index, column_index))
                     supply[row_index] -= demand[column_index]
                     solution[row_index][column_index] = demand[column_index]
+                    basic[row_index][column_index] = 1
                     column_index += 1
-            return TransportationSolution(solution, ans)
+            return TransportationSolution(solution, ans, basic)
 
         return northwest_corner_method_help(
             self.costs.copy(),
             self.supply.copy(),
             self.demand.copy(),
-            self.solution.copy())
+            self.solution.copy(),
+            self.basic.copy())
 
 
 class VogelMethod(Transportation):
@@ -117,20 +120,25 @@ class VogelMethod(Transportation):
                 total,
                 solution,
                 row_ids,
-                col_ids) -> TransportationSolution:
+                col_ids,
+                basic) -> TransportationSolution:
             if costs.shape[0] == 1:
                 for (col_id, elem) in zip(col_ids, demand):
                     solution[row_ids[0]][col_id] = elem
+                    basic[row_ids[0]][col_id] = 1
                 return TransportationSolution(
                     solution,
-                    sum([a * b for (a, b) in zip(demand, costs[0])]) + total
+                    sum([a * b for (a, b) in zip(demand, costs[0])]) + total,
+                    basic
                 )
             if costs.shape[1] == 1:
                 for (row_id, elem) in zip(row_ids, supply):
                     solution[row_id][col_ids[0]] = elem
+                    basic[row_id][col_ids[0]] = 1
                 return TransportationSolution(
                     solution,
-                    sum([a * b for (a, b) in zip(supply, costs[:, 0])]) + total
+                    sum([a * b for (a, b) in zip(supply, costs[:, 0])]) + total,
+                    basic
                 )
 
             row_differences, column_differences = find_difference(costs)
@@ -157,6 +165,7 @@ class VogelMethod(Transportation):
                 new_demand = demand.copy()
                 new_demand[target_col_index] = dif
                 solution[row_ids[target_row_index], col_ids[target_col_index]] = target_supply
+                basic[row_ids[target_row_index], col_ids[target_col_index]] = 1
                 return vogel_method_help(
                     new_consts,
                     new_supply,
@@ -164,7 +173,8 @@ class VogelMethod(Transportation):
                     target_elem * target_supply + total,
                     solution,
                     np.delete(row_ids, target_row_index),
-                    col_ids)
+                    col_ids,
+                    basic)
             else:
                 dif = target_supply - target_demand
                 new_consts = np.delete(costs, target_col_index, axis=1)
@@ -172,6 +182,7 @@ class VogelMethod(Transportation):
                 new_supply = supply.copy()
                 new_supply[target_row_index] = dif
                 solution[row_ids[target_row_index], col_ids[target_col_index]] = target_demand
+                basic[row_ids[target_row_index], col_ids[target_col_index]] = 1
                 return vogel_method_help(
                     new_consts,
                     new_supply,
@@ -179,7 +190,8 @@ class VogelMethod(Transportation):
                     target_elem * target_demand + total,
                     solution,
                     row_ids,
-                    np.delete(col_ids, target_col_index))
+                    np.delete(col_ids, target_col_index),
+                    basic)
 
         return vogel_method_help(
             np.asarray(self.costs),
@@ -188,7 +200,8 @@ class VogelMethod(Transportation):
             0,
             self.solution.copy(),
             np.arange(self.costs.shape[0]),
-            np.arange(self.costs.shape[1]))
+            np.arange(self.costs.shape[1]),
+            self.basic)
 
 
 class RussellMethod(Transportation):

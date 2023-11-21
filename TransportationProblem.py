@@ -196,15 +196,22 @@ class RussellMethod(Transportation):
             u = np.zeros(self.n)
             v = np.zeros(self.m)
             for i in range(self.n):
+                # check if row is still under consideration, if not, skip row
+                if self.supply[i] == 0:
+                    continue
                 for j in range(self.m):
-                    # check if row is still under consideration, if not, skip row
-                    if self.supply[i] == 0:
+                    # check if column is still under consideration, if not, skip column
+                    if self.demand[j] == 0:
                         continue
                     if self.solution[i, j] == 0 and self.costs[i, j] > u[i]:
                         u[i] = self.costs[i, j]
             for j in range(self.m):
+                # check if column is still under consideration, if not, skip column
+                if self.demand[j] == 0:
+                    continue
                 for i in range(self.n):
-                    if self.demand[j] == 0:
+                    # check if row is still under consideration, if not, skip row
+                    if self.supply[i] == 0:
                         continue
                     if self.solution[i, j] == 0 and self.costs[i, j] > v[j]:
                         v[j] = self.costs[i, j]

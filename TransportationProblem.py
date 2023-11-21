@@ -256,18 +256,3 @@ class RussellMethod(Transportation):
             if np.all(np.array(self.supply) == 0) and np.all(np.array(self.demand) == 0):
                 break
         return TransportationSolution(self.solution, np.multiply(self.solution, self.costs).sum(), self.basic)
-
-
-def main():
-    supply, demand, costs = parse_input("inputs/input2.txt")
-
-    transportation = Transportation(supply, demand, costs)
-    transportation.print_initial_table()
-    print("costs", transportation.costs)
-    print("costs size", transportation.costs.shape[0], transportation.costs.shape[1])
-    print("m", transportation.m)
-    print("n", transportation.n)
-
-
-if __name__ == '__main__':
-    main()

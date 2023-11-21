@@ -5,16 +5,20 @@ from input_parser import parse_input
 
 
 class TransportationSolution:
-    def __init__(self, solution, cost):
+    def __init__(self, solution, cost, basic=None):
         self.solution = solution
         self.cost = float(cost)
+        self.basic = basic
 
     def __str__(self):
         table = []
         for i in range(self.solution.shape[0]):
             row = []
             for j in range(self.solution.shape[1]):
-                row.append(self.solution[i, j])
+                if self.basic is not None and self.basic[i, j] == 1:
+                    row.append(f"({self.solution[i, j]})")
+                else:
+                    row.append(self.solution[i, j])
             table.append(row)
 
         return f"Solution:\n{tt.to_string(table)}\nCost: {self.cost}\n"
@@ -27,6 +31,7 @@ class Transportation:
         self.demand = demand
         self.n, self.m = self.costs.shape
         self.solution = np.zeros((self.n, self.m))
+        self.basic = np.zeros((self.n, self.m))
         self.iteration = 0
         self.check_inputs()
 
@@ -230,13 +235,14 @@ class RussellMethod(Transportation):
 
             # allocate goods or products on the cell
             self.solution[next_path[0], next_path[1]] = min(self.supply[next_path[0]], self.demand[next_path[1]])
+            self.basic[next_path[0], next_path[1]] = 1
             self.supply[next_path[0]] -= self.solution[next_path[0], next_path[1]]
             self.demand[next_path[1]] -= self.solution[next_path[0], next_path[1]]
 
             # check if all products are distributed (if all values in supply and demand are 0)
             if np.all(np.array(self.supply) == 0) and np.all(np.array(self.demand) == 0):
                 break
-        return TransportationSolution(self.solution, np.multiply(self.solution, self.costs).sum())
+        return TransportationSolution(self.solution, np.multiply(self.solution, self.costs).sum(), self.basic)
 
 
 def main():
